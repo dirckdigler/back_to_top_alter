@@ -6,7 +6,7 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
-use \Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_help().
@@ -36,23 +36,26 @@ function bounteous_form_back_to_top_settings_alter(&$form, &$form_state, $form_i
     '#title' => t('Prevent custom pages'),
     '#placeholder' => t('example.com/software/index.html'),
     '#field_prefix' => '/',
-    '#default_value' => isset($settings['back_to_top_prevent_first_page']) 
+    '#default_value' => isset($settings['back_to_top_prevent_first_page'])
     ? $settings['back_to_top_prevent_first_page'] : '',
   ];
   $form['back_to_top_prevent_second_page'] = [
     '#type' => 'textfield',
-    '#title' => t(''),
-    '#description' => t('If the URL is (e.g., http/example.com/software/index.html), add just: example.com/software/index.html'),
+    '#description' => t(
+      'If the URL is (e.g., http/example.com/software/index.html), add just:
+      example.com/software/index.html'
+    ),
     '#placeholder' => t('example.com/software/index.html'),
     '#field_prefix' => '/',
-    '#default_value' => isset($settings['back_to_top_prevent_second_page']) 
+    '#default_value' => isset($settings['back_to_top_prevent_second_page'])
     ? $settings['back_to_top_prevent_second_page'] : '',
   ];
-  
+
   // print_r($settings);
   foreach (array_keys($form['actions']) as $action) {
-    if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
-      $form['actions']['submit']['#submit'][]  = 'bounteous_form_submit'; 
+    if ($action != 'preview' && isset($form['actions'][$action]['#type'])
+      && $form['actions'][$action]['#type'] === 'submit') {
+      $form['actions']['submit']['#submit'][] = 'bounteous_form_submit';
     }
   }
 }
@@ -65,8 +68,10 @@ function bounteous_form_submit(&$form, FormStateInterface $form_state) {
   $form_state->getFormObject()->submitForm($form, $form_state);
 
   $config = \Drupal::configFactory()->getEditable('bounteous.settings');
-  $config->set('back_to_top_prevent_first_page', $form_state->getValue('back_to_top_prevent_first_page'))
-    ->set('back_to_top_prevent_second_page', $form_state->getValue('back_to_top_prevent_second_page'))
+  $config->set('back_to_top_prevent_first_page',
+    $form_state->getValue('back_to_top_prevent_first_page'))
+    ->set('back_to_top_prevent_second_page',
+    $form_state->getValue('back_to_top_prevent_second_page'))
     ->save();
 }
 
@@ -76,17 +81,17 @@ function bounteous_form_submit(&$form, FormStateInterface $form_state) {
 function bounteous_page_attachments(array &$attachments) {
   $config = \Drupal::config('bounteous.settings');
   $settings = $config->get();
-  $path = $current_path = \Drupal::service('path.current')->getPath();
+  $path = \Drupal::service('path.current')->getPath();
   print_r($settings['back_to_top_prevent_first_page']);
   print_r($settings['back_to_top_prevent_second_page']);
 
   // print_r($path);
   if ($path == '/' . $settings['back_to_top_prevent_first_page']) {
     return FALSE;
-  } 
+  }
   if ($path == '/' . $settings['back_to_top_prevent_second_page']) {
     return FALSE;
-  } 
+  }
 
   $attachments['#attached']['library'][] = 'bounteous/bounteous_js';
 }
